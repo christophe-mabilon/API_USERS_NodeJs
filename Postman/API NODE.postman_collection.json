@@ -67,17 +67,17 @@
 			"response": []
 		},
 		{
-			"name": "ADMIN touts les users",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n\"username\":\"chris\",\r\n\"email\":\"chris@email.fr\",\r\n\"password\":\"12345678\",\r\n\"roles\":[\"admin\"]\r\n}",
-					"options": {
+          "name": "SUPER-ADMIN touts les users",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"username\":\"chris\",\r\n\"email\":\"chris@email.fr\",\r\n\"password\":\"12345678\",\r\n\"roles\":[\"admin\"]\r\n}",
+              "options": {
 						"raw": {
 							"language": "json"
 						}
