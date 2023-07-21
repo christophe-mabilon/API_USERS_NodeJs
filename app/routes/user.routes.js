@@ -34,10 +34,6 @@ const userRouter = express.Router();
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       500:
- *         description: Error, cannot get users' information.
  */
 userRouter.get(
   "/super-admin/users",
@@ -51,8 +47,6 @@ userRouter.get(
  *   get:
  *     summary: Get all users' information for admin access only.
  *     tags: [Users]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Success, returns all admin users' information.
@@ -62,10 +56,6 @@ userRouter.get(
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       500:
- *         description: Error, cannot get users' information.
  */
 userRouter.get(
   "/admin/users",
@@ -79,28 +69,39 @@ userRouter.get(
  *   get:
  *     summary: Get user information by ID.
  *     tags: [Users]
- *     security:
- *       - bearerAuth: []
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         description: User ID to fetch.
  *         schema:
  *           type: string
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Success, returns user information.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       404:
- *         description: User not found.
- *       500:
- *         description: Error, cannot get user information.
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: User ID.
+ *                   example: 5f9d4f8f5f9d4f8f5f9d4f8f
+ *                 username:
+ *                   type: string
+ *                   description: User username.
+ *                   example: bertrand_test
+ *                 email:
+ *                   type: string
+ *                   description: User email.
+ *                   example: bertrand@test.fr
+ *                 roles:
+ *                   type: array
+ *                   description: User roles.
+ *                   example: ["user", "admin"]
  */
 userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
 
@@ -110,21 +111,19 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *   put:
  *     summary: Edit user information.
  *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: User ID to edit.
- *         schema:
- *           type: string
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UserEdit'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The user's name.
+ *                 example: Leanne Graham
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Success, user information updated.
@@ -133,17 +132,25 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *             schema:
  *               type: object
  *               properties:
- *                 message:
- *                   type: string
- *                   example: User updated successfully!
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       403:
- *         description: Not authorized, user is not admin or super admin.
- *       404:
- *         description: User not found.
- *       500:
- *         description: Error, cannot update user information.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       description: User ID.
+ *                       example: 5f9d4f8f5f9d4f8f5f9d4f8f
+ *                     username:
+ *                       type: string
+ *                       description: User username.
+ *                       example: bertrand_test
+ *                     email:
+ *                       type: string
+ *                       description: User email.
+ *                       example: bertrand@test.fr
+ *                     roles:
+ *                       type: array
+ *                       description: User roles.
+ *                       example: ["user", "admin"]
  */
 userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
 
@@ -173,14 +180,6 @@ userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
  *                 message:
  *                   type: string
  *                   example: User deleted successfully!
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       403:
- *         description: Not authorized, user is not admin or super admin.
- *       404:
- *         description: User not found.
- *       500:
- *         description: Error, cannot delete user.
  */
 userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
 
