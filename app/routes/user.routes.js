@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   name: Users
- *   description: API to manage your users.
+ *   description: API to manage users.
  */
 
 import {
@@ -15,59 +15,61 @@ import {
 import express from "express";
 import authJwt from "../middlewares/authJwt.js";
 
-const app = express();
 const userRouter = express.Router();
 
-
-app.use((req, res, next) => {
-    res.header(
-        "Access-Control-Allow-Headers",
-        "x-access-token, Origin, Content-Type, Accept"
-    );
-    next();
-});
 /**
  * @swagger
  * /api/super-admin/users:
  *   get:
- *     summary: Get all users infos for admin access only.
+ *     summary: Get all users' information for admin access only.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Success, return all admin users infos.
+ *         description: Success, returns all admin users' information.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
  *       401:
  *         description: Not authorized, token missing or invalid.
  *       500:
- *         description: Error, cannot get users infos.
+ *         description: Error, cannot get users' information.
  */
 userRouter.get("/super-admin/users", [authJwt.verifyToken, authJwt.isSuperAdmin], getAllUsersInfosSuperAdminAccess);
 
 /**
  * @swagger
- * /api/super-admin/users:
+ * /api/admin/users:
  *   get:
- *     summary: Get all users infos for admin access only.
+ *     summary: Get all users' information for admin access only.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Success, return all admin users infos.
+ *         description: Success, returns all admin users' information.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
  *       401:
  *         description: Not authorized, token missing or invalid.
  *       500:
- *         description: Error, cannot get users infos.
+ *         description: Error, cannot get users' information.
  */
 userRouter.get("/admin/users", [authJwt.verifyToken, authJwt.isAdmin], getAllUsersInfos);
-
 
 /**
  * @swagger
  * /api/user/{id}:
  *   get:
- *     summary: get user infos.
+ *     summary: Get user information by ID.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -75,28 +77,30 @@ userRouter.get("/admin/users", [authJwt.verifyToken, authJwt.isAdmin], getAllUse
  *       - name: id
  *         in: path
  *         required: true
- *         description: user id to get
+ *         description: User ID to fetch.
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Success, return user infos.
+ *         description: Success, returns user information.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  *       401:
  *         description: Not authorized, token missing or invalid.
  *       404:
  *         description: User not found.
  *       500:
- *         description: Error, cannot get user infos.
+ *         description: Error, cannot get user information.
  */
 userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
-
-
 
 /**
  * @swagger
  * /api/user/{id}:
  *   put:
- *     summary: Edit user infos.
+ *     summary: Edit user information.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -104,12 +108,26 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *       - name: id
  *         in: path
  *         required: true
- *         description: user id to edit
+ *         description: User ID to edit.
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserEdit'
  *     responses:
  *       200:
- *         description: Success, user infos updated.
+ *         description: Success, user information updated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User updated successfully!
  *       401:
  *         description: Not authorized, token missing or invalid.
  *       403:
@@ -117,7 +135,7 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *       404:
  *         description: User not found.
  *       500:
- *         description: Error, cannot update user infos.
+ *         description: Error, cannot update user information.
  */
 userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
 
@@ -125,7 +143,7 @@ userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
  * @swagger
  * /api/user/{id}:
  *   delete:
- *     summary: Delete user.
+ *     summary: Delete user by ID.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -133,12 +151,20 @@ userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
  *       - name: id
  *         in: path
  *         required: true
- *         description: user id to delete
+ *         description: User ID to delete.
  *         schema:
  *           type: string
  *     responses:
  *       200:
  *         description: Success, user deleted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully!
  *       401:
  *         description: Not authorized, token missing or invalid.
  *       403:
