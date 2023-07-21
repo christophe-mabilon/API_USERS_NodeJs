@@ -1,9 +1,10 @@
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: API to manage users.
+ *   name: API USERS
+ *   description: API Users endpoints
  */
+
 
 import {
   deleteUser,

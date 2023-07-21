@@ -1,30 +1,35 @@
 /**
  * @swagger
  * tags:
- *   name: Auth
- *   description: API endpoints for authentication
+ *   name: Authentication
+ *   description: Endpoints for user authentication
  */
 
-import {refreshToken, signin, signup} from "../controllers/auth.controller.js";
+
+import {
+  refreshToken,
+  signin,
+  signup,
+} from "../controllers/auth.controller.js";
 import express from "express";
 import verifySignUp from "../middlewares/verifySignUp.js";
 
-const app = express()
+const app = express();
 const authRouter = express.Router();
 app.use((req, res, next) => {
-    res.setHeader(
-        "Access-Control-Allow-Headers",
-        "x-access-token, Origin, Content-Type, Accept"
-    );
-    next();
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "x-access-token, Origin, Content-Type, Accept"
+  );
+  next();
 });
 
 /**
  * @swagger
- * /api/signup:
+ * /api/auth/signup:
  *   post:
  *     summary: Register a new user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -84,19 +89,16 @@ app.use((req, res, next) => {
  *           password: azertyuiop
  */
 authRouter.post(
-    "/signup",
-    [
-        verifySignUp.checkDuplicateUsernameOrEmail,
-        verifySignUp.checkRolesExisted
-    ],
-    signup
+  "/signup",
+  [verifySignUp.checkDuplicateUsernameOrEmail, verifySignUp.checkRolesExisted],
+  signup
 );
 /**
  * @swagger
- * /api/signin:
+ * /api/auth/signin:
  *   post:
  *     summary: Authenticate a user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -149,10 +151,10 @@ authRouter.post("/signin", signin);
 
 /**
  * @swagger
- * /api/refreshToken:
+ * /api/auth/refreshToken:
  *   post:
  *     summary: Refresh the access token
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     description: Use this endpoint to refresh the access token by providing a valid refresh token.
  *     requestBody:
  *       required: true
@@ -215,6 +217,6 @@ authRouter.post("/signin", signin);
  *         value:
  *           refreshToken: your_refresh_token_here
  */
-authRouter.post('/refreshToken',refreshToken)
+authRouter.post("/refreshToken", refreshToken);
 
 export default authRouter;
