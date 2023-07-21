@@ -9,7 +9,7 @@ const router = express.Router();
  * /api/tv/all:
  *   get:
  *     summary: Get list of tv show
- *     tags: [TV series]
+ *     tags: [TV show]
  *     responses:
  *       200:
  *         description: Success, returns a list of tv
@@ -27,7 +27,7 @@ router.get(
  * /api/tv/{id}/:
  *   get:
  *     summary: Get a tv show by id
- *     tags: [TV series]
+ *     tags: [TV show]
  *     responses:
  *       200:
  *         description: Success, returns a tv by id
@@ -42,7 +42,7 @@ router.get("/:id", tvController.getTVById);
  * /api/tv/:
  *   post:
  *     summary: Create a new tv show
- *     tags: [TV series]
+ *     tags: [TV show]
  *     responses:
  *       200:
  *         description: Success, returns the new tv
@@ -56,7 +56,7 @@ router.post("/", tvController.createTV);
  * /api/tv/{id}:
  *   patch:
  *     summary: Update a tv show
- *     tags: [TV series]
+ *     tags: [TV show]
  *     responses:
  *       200:
  *         description: Success, returns the new tv
@@ -71,7 +71,7 @@ router.patch("/:id", tvController.updateTV);
  * /api/tv/{id}:
  *   delete:
  *     summary: Delete a tv show
- *     tags: [TV series]
+ *     tags: [TV show]
  *     responses:
  *       200:
  *         description: Success, TV deleted
