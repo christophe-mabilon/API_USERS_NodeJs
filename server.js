@@ -6,6 +6,7 @@ import userRouter from "./app/routes/user.routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 import dotenv from "dotenv";
+import tvRouter from "./app/routes/tv.routes.js";
 dotenv.config();
 
 const swaggerOptions = {
@@ -32,7 +33,7 @@ const swaggerOptions = {
 
 const app = express();
 const swaggerDocs = swaggerJsDoc(swaggerOptions); // swagger configuration
-
+const TV = db.tv
 const corsOptions = {
     origin: "http://localhost:8081"
 };
@@ -47,6 +48,7 @@ app.use(express.urlencoded({extended: true}));
 
 app.use("/api/auth", authRouter);
 app.use("/api", userRouter);
+app.use('/api/tv', tvRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // swagger route
 const Role = db.role;
 
@@ -103,3 +105,14 @@ async function initial() {
         }
     }
 }
+
+async function logTVCount() {
+    try {
+      const count = await TV.countDocuments();
+      console.log(`Nombre d'ID dans la collection "tv" : ${count}`);
+    } catch (err) {
+      console.error("Erreur lors du comptage des documents :", err);
+    }
+  }
+
+  logTVCount();
