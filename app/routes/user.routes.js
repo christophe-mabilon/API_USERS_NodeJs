@@ -86,13 +86,7 @@ userRouter.get("/admin/users", [authJwt.verifyToken, authJwt.isAdmin], getAllUse
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       404:
- *         description: User not found.
- *       500:
- *         description: Error, cannot get user information.
+ *               $ref: '#/components/schemas/User'.
  */
 userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
 
@@ -128,14 +122,6 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *                 message:
  *                   type: string
  *                   example: User updated successfully!
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       403:
- *         description: Not authorized, user is not admin or super admin.
- *       404:
- *         description: User not found.
- *       500:
- *         description: Error, cannot update user information.
  */
 userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
 
@@ -165,14 +151,6 @@ userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
  *                 message:
  *                   type: string
  *                   example: User deleted successfully!
- *       401:
- *         description: Not authorized, token missing or invalid.
- *       403:
- *         description: Not authorized, user is not admin or super admin.
- *       404:
- *         description: User not found.
- *       500:
- *         description: Error, cannot delete user.
  */
 userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
 
