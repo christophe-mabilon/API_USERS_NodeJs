@@ -7,145 +7,175 @@ const User = db.user;
 const Role = db.role;
 
 function generateAccessToken(user) {
-    return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1800s'});
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "1800s",
+  });
 }
 
 function generateRefreshToken(user) {
-    return jwt.sign({user}, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '1y'});
+  return jwt.sign({ user }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: "1y",
+  });
 }
 
 const verifyToken = async (req, res, next) => {
-    try {
-        const token = req.headers.authorization.split(' ')[1];
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        const userId = decodedToken.id;
-        req.auth = {
-            userId: userId
-        };
-        next();
-    } catch (error) {
-        res.status(401).json({error});
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decodedToken.id;
+    req.auth = {
+      userId: userId,
+    };
+    next();
+  } catch (err) {
+    switch (err.statusCode) {
+      case 401:
+        return err.status(401).send({ message: "Non autorisé !" });
+      case 403:
+        return res
+          .status(403)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      case 404:
+        return res
+          .status(403)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      default:
+        return res.status(500).send({
+          message:
+            "Vous n'avez pas le droit nésscesaire seul le admin peut consulter cette requete",
+        });
     }
+  }
 };
 
 const isSuperAdmin = async (req, res, next) => {
-    const definedRole = 'super-admin';
-    const userId = req.auth.userId;
-    try {
-        const user = await User.findById(userId);
-        const role = await Role.findOne({_id: user.roles[0]});
-        if (role.name.toUpperCase() === definedRole.toUpperCase()) {
-            next();
-        }
-
-    } catch (err) {
-        switch (res.statusCode) {
-            case 401:
-            return res.status(401).send({message: "Non autorisé !"});
-            case 403:
-                return res.status(403).send({message: `Nécessite le rôle de ${definedRole} !`});
-            case 404:
-                return res.status(403).send({message: `Nécessite le rôle de ${definedRole} !`});
-            default:
-                return res.status(500).send({message: `$Erreur ${res.statusCode} !`});
-        }
-
+  const definedRole = "super-admin";
+  const userId = req.auth.userId;
+  try {
+    const user = await User.findById(userId);
+    const role = await Role.findOne({ _id: user.roles[0] });
+    if (role.name.toUpperCase() === definedRole.toUpperCase()) {
+      next();
     }
+  } catch (err) {
+    switch (err.statusCode) {
+      case 401:
+        return err.status(401).send({ message: "Non autorisé !" });
+      case 403:
+        return res
+          .status(403)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      case 404:
+        return res
+          .status(404)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      default:
+        return res.status(500).send({ message: `$Erreur ${err.statusCode} !` });
+    }
+  }
 };
 
-
 const isAdmin = async (req, res, next) => {
-    const definedRole = 'admin';
-    const userId = req.auth.userId;
-    try {
-        const user = await User.findById(userId);
-        const role = await Role.findOne({_id: user.roles[0]});
-        if (role.name.toUpperCase() === definedRole.toUpperCase()) {
-            next();
-        }
-        switch (res.statusCode) {
-            case 403:
-                return res.status(403).send({message: `Nécessite le rôle de ${definedRole} !`});
-            case 401:
-                return res.status(401).send({message: "Non autorisé !"});
-            default:
-                return res.status(500).send({message: `$Erreur ${res.statusCode} !`});
-        }
-    } catch (err) {
-        return res.status(500).send(err);
+  const definedRole = "admin";
+  const userId = req.auth.userId;
+  try {
+    const user = await User.findById(userId);
+    const role = await Role.findOne({ _id: user.roles[0] });
+    if (role.name.toUpperCase() === definedRole.toUpperCase()) {
+      return next();
     }
+    switch (err.statusCode) {
+      case 403:
+        return res
+          .status(403)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      case 401:
+        return res.status(401).send({ message: "Non autorisé !" });
+      default:
+        return res.status(500).send({ message: `$Erreur ${res.statusCode} !` });
+    }
+  } catch (err) {
+    return res.status(500).send(err);
+  }
 };
 
 const isClient = async (req, res, next) => {
-    const definedRole = 'client';
-    const userId = req.auth.userId;
-    try {
-        const user = await User.findById(userId);
-        const role = await Role.findOne({_id: user.roles[0]});
-        if (role.name.toUpperCase() === definedRole.toUpperCase()) {
-            next();
-        }
-        switch (res.statusCode) {
-            case 403:
-                return res.status(403).send({message: `Nécessite le rôle de ${definedRole} !`});
-            case 401:
-                return res.status(401).send({message: "Non autorisé !"});
-            default:
-                return res.status(500).send({message: `$Erreur ${res.statusCode} !`});
-        }
-    } catch (err) {
-        return res.status(500).send(err);
+  const definedRole = "client";
+  const userId = req.auth.userId;
+  try {
+    const user = await User.findById(userId);
+    const role = await Role.findOne({ _id: user.roles[0] });
+    if (role.name.toUpperCase() === definedRole.toUpperCase()) {
+      next();
     }
-}
+  } catch (err) {
+    switch (err.statusCode) {
+      case 403:
+        return res
+          .status(403)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      case 401:
+        return res.status(401).send({ message: "Non autorisé !" });
+      default:
+        return res.status(500).send({ message: `$Erreur ${res.statusCode} !` });
+    }
+  }
+};
 
 const isProvider = async (req, res, next) => {
-    const definedRole = 'provider';
-    const userId = req.auth.userId;
-    try {
-        const user = await User.findById(userId);
-        const role = await Role.findOne({_id: user.roles[0]});
-        if (role.name.toUpperCase() === definedRole.toUpperCase()) {
-            next();
-        }
-        switch (res.statusCode) {
-            case 403:
-                return res.status(403).send({message: `Nécessite le rôle de ${definedRole} !`});
-            case 401:
-                return res.status(401).send({message: "Non autorisé !"});
-            default:
-                return res.status(500).send({message: `$Erreur ${res.statusCode} !`});
-        }
-    } catch (err) {
-        return res.status(500).send(err);
+  const definedRole = "provider";
+  const userId = req.auth.userId;
+  try {
+    const user = await User.findById(userId);
+    const role = await Role.findOne({ _id: user.roles[0] });
+    if (role.name.toUpperCase() === definedRole.toUpperCase()) {
+      next();
     }
-}
+  } catch (err) {
+    switch (err.statusCode) {
+      case 403:
+        return res
+          .status(403)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      case 401:
+        return res.status(401).send({ message: "Non autorisé !" });
+      default:
+        return res.status(500).send({ message: `$Erreur ${res.statusCode} !` });
+    }
+  }
+};
 
 const isNewUser = async (req, res, next) => {
-    const definedRole = 'new_user';
-    const userId = req.auth.userId;
-    try {
-        const user = await User.findById(userId);
-        const role = await Role.findOne({_id: user.roles[0]});
-        if (role.name.toUpperCase() === definedRole.toUpperCase()) {
-            next();
-        }
-        switch (res.statusCode) {
-            case 403:
-                return res.status(403).send({message: `Nécessite le rôle de ${definedRole} !`});
-            case 401:
-                return res.status(401).send({message: "Non autorisé !"});
-            default:
-                return res.status(500).send({message: `$Erreur ${res.statusCode} !`});
-        }
-    } catch (err) {
-        return res.status(500).send(err);
+  const definedRole = "new_user";
+  const userId = req.auth.userId;
+  try {
+    const user = await User.findById(userId);
+    const role = await Role.findOne({ _id: user.roles[0] });
+    if (role.name.toUpperCase() === definedRole.toUpperCase()) {
+      next();
     }
-}
+  } catch (err) {
+    switch (err.statusCode) {
+      case 403:
+        return res
+          .status(403)
+          .send({ message: `Nécessite le rôle de ${definedRole} !` });
+      case 401:
+        return res.status(401).send({ message: "Non autorisé !" });
+      default:
+        return res.status(500).send({ message: `$Erreur ${res.statusCode} !` });
+    }
+  }
+};
 
 const authJwt = {
-    verifyToken, generateAccessToken, generateRefreshToken,
-    isSuperAdmin,
-    isAdmin,
-    isClient, isProvider, isNewUser
+  verifyToken,
+  generateAccessToken,
+  generateRefreshToken,
+  isSuperAdmin,
+  isAdmin,
+  isClient,
+  isProvider,
+  isNewUser,
 };
 export default authJwt;

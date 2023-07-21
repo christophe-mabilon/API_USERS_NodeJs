@@ -11,6 +11,6 @@ import role from './role.model.js';
 db.user = user
 db.role = role;
 
-db.ROLES = ["provider", "client", "admin","new_user"];
+db.ROLES = ["provider", "client", "admin","new_user","super-admin"];
 
 export default db;

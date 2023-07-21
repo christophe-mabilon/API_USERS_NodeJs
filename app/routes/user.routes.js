@@ -6,11 +6,11 @@
  */
 
 import {
-    deleteUser,
-    editUserInfos,
-    getAllUsersInfos,
-    getAllUsersInfosSuperAdminAccess,
-    getUserInfos,
+  deleteUser,
+  editUserInfos,
+  getAllUsersInfos,
+  getAllUsersInfosSuperAdminAccess,
+  getUserInfos,
 } from "../controllers/user.controller.js";
 import express from "express";
 import authJwt from "../middlewares/authJwt.js";
@@ -21,7 +21,7 @@ const userRouter = express.Router();
  * @swagger
  * /api/super-admin/users:
  *   get:
- *     summary: Get all users' information for admin access only.
+ *     summary: Get all users' information for super-admin access only.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -39,7 +39,11 @@ const userRouter = express.Router();
  *       500:
  *         description: Error, cannot get users' information.
  */
-userRouter.get("/super-admin/users", [authJwt.verifyToken, authJwt.isSuperAdmin], getAllUsersInfosSuperAdminAccess);
+userRouter.get(
+  "/super-admin/users",
+  [authJwt.verifyToken, authJwt.isSuperAdmin],
+  getAllUsersInfosSuperAdminAccess
+);
 
 /**
  * @swagger
@@ -63,7 +67,11 @@ userRouter.get("/super-admin/users", [authJwt.verifyToken, authJwt.isSuperAdmin]
  *       500:
  *         description: Error, cannot get users' information.
  */
-userRouter.get("/admin/users", [authJwt.verifyToken, authJwt.isAdmin], getAllUsersInfos);
+userRouter.get(
+  "/admin/users",
+  [authJwt.verifyToken, authJwt.isAdmin],
+  getAllUsersInfos
+);
 
 /**
  * @swagger
