@@ -3,10 +3,34 @@ import cors from "cors";
 import db from "./app/models/index.js";
 import authRouter from "./app/routes/auth.routes.js";
 import userRouter from "./app/routes/user.routes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsDoc from "swagger-jsdoc";
 import dotenv from "dotenv";
 dotenv.config();
 
+const swaggerOptions = {
+    swaggerDefinition: {
+      info: {
+        title: 'ESGI B3 AL Express API with Swagger',
+        version: '1.0.0',
+        description: 'This is a simple CRUD API application made with Express and documented with Swagger',
+        contact: {
+          name: "ESGI",
+          url: "",
+          email: "ESGI@ESGI.com",
+        },
+      },
+      servers: [
+        {
+          url: "http://localhost:3000",
+        },
+      ],
+    },
+    apis: ["./app/routes/*.js"],
+  };
+
 const app = express();
+const swaggerDocs = swaggerJsDoc(swaggerOptions); // swagger configuration
 
 const corsOptions = {
     origin: "http://localhost:8081"
@@ -22,9 +46,10 @@ app.use(express.urlencoded({extended: true}));
 
 app.use("/api/auth", authRouter);
 app.use("/api", userRouter);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // swagger route
 const Role = db.role;
 
-    db.mongoose
+db.mongoose
         .connect(`mongodb://${process.env.HOST}:${process.env.PORTDB}/${process.env.DB}`, {
             useNewUrlParser: true,
             useUnifiedTopology: true
