@@ -1,8 +1,9 @@
 import {
     deleteUser,
     editUserInfos,
-    getAllUsersInfos, getAllUsersInfosSuperAdminAccess, getUserInfos,
-
+    getAllUsersInfos,
+    getAllUsersInfosSuperAdminAccess,
+    getUserInfos,
 } from "../controllers/user.controller.js";
 import express from "express";
 import authJwt from "../middlewares/authJwt.js";
