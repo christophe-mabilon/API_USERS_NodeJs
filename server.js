@@ -9,25 +9,33 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const swaggerOptions = {
-    swaggerDefinition: {
-      info: {
-        title: 'ESGI B3 AL Express API with Swagger',
-        version: '1.0.0',
-        description: 'This is a simple CRUD API application made with Express and documented with Swagger',
-        contact: {
-          name: "ESGI",
-          url: "",
-          email: "ESGI@ESGI.com",
-        },
+  swaggerDefinition: {
+    info: {
+      title: 'ESGI B3 AL Express API with Swagger',
+      version: '1.0.0',
+      description: 'This is a simple CRUD API application made with Express and documented with Swagger',
+      contact: {
+        name: "ESGI",
+        url: "",
+        email: "ESGI@ESGI.com",
       },
-      servers: [
-        {
-          url: "http://localhost:3000",
-        },
-      ],
     },
-    apis: ["./app/routes/*.js"],
-  };
+    servers: [
+      {
+        url: "http://localhost:8080",
+      },
+    ],
+  },
+  apis: ["./app/routes/*.js"],
+  securityDefinitions: {
+    bearerAuth: {
+      type: "apiKey",
+      name: "Authorization",
+      in: "header",
+      description: "Enter the token for authentication"
+    },
+  },
+};
 
 const app = express();
 const swaggerDocs = swaggerJsDoc(swaggerOptions); // swagger configuration
