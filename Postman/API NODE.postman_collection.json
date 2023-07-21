@@ -7,97 +7,233 @@
 	},
 	"item": [
 		{
-			"name": "INSCRIPTION",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n\"username\":\"chris\",\r\n\"email\":\"chris@email.fr\",\r\n\"password\":\"12345678\",\r\n\"roles\":[\"admin\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "USER",
+			"item": [
+				{
+					"name": "ADD / LOGIN",
+					"item": [
+						{
+							"name": "INSCRIPTION",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"username\":\"chris\",\r\n\"email\":\"chris@email.fr\",\r\n\"password\":\"12345678\",\r\n\"roles\":[\"admin\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/auth/signup",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"auth",
+										"signup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Connexion",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\"username\":\"chris\",\r\n\"email\":\"chris@email.fr\",\r\n\"password\":\"12345678\",\r\n\"roles\":[\"admin\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/auth/signin",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"auth",
+										"signin"
+									]
+								}
+							},
+							"response": []
 						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/api/auth/signup",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"auth",
-						"signup"
 					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Connexion",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n\"username\":\"chris\",\r\n\"email\":\"chris@email.fr\",\r\n\"password\":\"12345678\",\r\n\"roles\":[\"admin\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+				},
+				{
+					"name": "SUPER-ADMIN touts les users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YmE0ZmU3ZDQ1YTlhNzVkNjYyNGQ1NyIsImlhdCI6MTY4OTkzNTY5OSwiZXhwIjoxNjg5OTM5Mjk5fQ.4bjh8MGrKyX6KP9eU4W98n5FhwWTKGkLBEgjeL-ec4g",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"username\":\"admin\",\r\n\"email\":\"admin@email.fr\",\r\n\"password\":\"12345678\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/admin/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:8080/api/auth/signin",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"auth",
-						"signin"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-          "name": "SUPER-ADMIN touts les users",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n\"username\":\"chris\",\r\n\"email\":\"chris@email.fr\",\r\n\"password\":\"12345678\",\r\n\"roles\":[\"admin\"]\r\n}",
-              "options": {
-						"raw": {
-							"language": "json"
+				{
+					"name": "ADMIN touts les users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YmE0ZmU3ZDQ1YTlhNzVkNjYyNGQ1NyIsImlhdCI6MTY4OTkzNTY5OSwiZXhwIjoxNjg5OTM5Mjk5fQ.4bjh8MGrKyX6KP9eU4W98n5FhwWTKGkLBEgjeL-ec4g",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"username\":\"admin\",\r\n\"email\":\"admin@email.fr\",\r\n\"password\":\"12345678\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/admin/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:8080/api/super-admin/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"super-admin",
-						"users"
-					]
+				{
+					"name": "DETAILS USER",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0YmE0ZmU3ZDQ1YTlhNzVkNjYyNGQ1NyIsImlhdCI6MTY4OTk0NTAyNywiZXhwIjoxNjg5OTQ4NjI3fQ.w6YgHQ1gh6tO05yaptgflgYNM6E4USxdXz5DvBYO51U",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/user/64ba4fd6d45a9a75d6624d51",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"64ba4fd6d45a9a75d6624d51"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MODIF USER",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/user/64ba4fd6d45a9a75d6624d51",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"64ba4fd6d45a9a75d6624d51"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE USER",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/user/64ba4fd6d45a9a75d6624d51",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"64ba4fd6d45a9a75d6624d51"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		}
 	]
 }
