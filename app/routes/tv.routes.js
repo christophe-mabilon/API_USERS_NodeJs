@@ -3,19 +3,78 @@ import authJwt from "../middlewares/authJwt.js";
 import tvController from '../controllers/tv.controller.js';
 
 const router = express.Router();
-// Route GET pour obtenir tous les documents TV
+
+/**
+ * @swagger
+ * /api/tv/:
+ *   get:
+ *     summary: Get list of tv show
+ *     tags: [TV]
+ *     responses:
+ *       200:
+ *         description: Success, returns a list of tv
+ *       500:
+ *         description: Error, cannot get tv
+ */
 router.get('/', [authJwt.verifyToken, authJwt.isAdmin], tvController.getAllTV);
 
-// Route GET pour obtenir un document TV par son ID
+/**
+ * @swagger
+ * /api/tv/{id}/:
+ *   get:
+ *     summary: Get a tv show by id
+ *     tags: [TV]
+ *     responses:
+ *       200:
+ *         description: Success, returns a tv by id
+ *       404: Error, Tv not found
+ *       500:
+ *         description: Error, cannot get tv
+ */
 router.get('/:id', tvController.getTVById);
 
-// Route POST pour créer un nouveau document TV
+/**
+ * @swagger
+ * /api/tv/:
+ *   get:
+ *     summary: Create a new tv show
+ *     tags: [TV]
+ *     responses:
+ *       200:
+ *         description: Success, returns the new tv
+ *       400:
+ *         description: Error, cannot get tv
+ */
 router.post('/', tvController.createTV);
 
-// Route PUT pour mettre à jour un document TV
-router.put('/:id', tvController.updateTV);
+/**
+ * @swagger
+ * /api/tv/{id}:
+ *   get:
+ *     summary: Update a tv show
+ *     tags: [TV]
+ *     responses:
+ *       200:
+ *         description: Success, returns the new tv
+ *       404: Error, Tv not found
+ *       500:
+ *         description: Error message
+ */
+router.patch('/:id', tvController.updateTV);
 
-// Route DELETE pour supprimer un document TV
+/**
+ * @swagger
+ * /api/tv/{id}:
+ *   get:
+ *     summary: Delete a tv show
+ *     tags: [TV]
+ *     responses:
+ *       200:
+ *         description: Success, TV deleted
+ *       404: Error, Tv not found
+ *       500:
+ *         description: Error message
+ */
 router.delete('/:id', tvController.deleteTV);
 
 export default router;
