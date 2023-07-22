@@ -1,12 +1,14 @@
 import db from "../models/index.js";
-const TV = db.tv
+import responseTvErrors from "../middlewares/errorHandler.js";
+
+const TV = db.tv;
 
 const getAllTV = async (req, res) => {
   try {
     const tvList = await TV.find().limit(100);
     res.json(tvList);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    return responseTvErrors(err, res);
   }
 };
 
@@ -17,12 +19,9 @@ const getTVById = async (req, res) => {
     const tv = await TV.findOne({ id: id });
     if (tv) {
       res.json(tv);
-    } else {
-      res.status(404).json({ message: 'TV not found' });
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-    console.error(error + ' ' + req.params.id + ' ' + req.params.id.length);
+  } catch (err) {
+    return responseTvErrors(err, res);
   }
 };
 
@@ -30,10 +29,10 @@ const getTVById = async (req, res) => {
 const createTV = async (req, res) => {
   try {
     const tv = new TV(req.body);
-    const newTV = await tv.save();
-    res.status(201).json(newTV);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    await tv.save();
+    res.status(201).json({ message: "Série TV saubegardée avec succes !" });
+  } catch (err) {
+    return responseTvErrors(err, res);
   }
 };
 
@@ -43,9 +42,29 @@ const updateTV = async (req, res) => {
     const tv = await TV.findOne({ id: tvId });
 
     if (!tv) {
-      return res.status(404).json({ message: "TV not found" });
+      return responseTvErrors(404, res);
     }
-    const { id, name, original_name, overview, tagline, in_production, status, original_language, origin_country, created_by, first_air_date,  last_air_date, number_of_episodes, number_of_seasons, production_companies, poster_path, vote_average, vote_count, popularity} = req.body;
+    const {
+      id,
+      name,
+      original_name,
+      overview,
+      tagline,
+      in_production,
+      status,
+      original_language,
+      origin_country,
+      created_by,
+      first_air_date,
+      last_air_date,
+      number_of_episodes,
+      number_of_seasons,
+      production_companies,
+      poster_path,
+      vote_average,
+      vote_count,
+      popularity,
+    } = req.body;
 
     // Mettre à jour les champs du document TV
     if (id) tv.id = id;
@@ -69,10 +88,10 @@ const updateTV = async (req, res) => {
     if (popularity) tv.popularity = popularity;
 
     // Sauvegarder les modifications
-    const updatedTV = await tv.save();
-    res.json(updatedTV);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    await tv.save();
+    res.json({ message: "Série TV mis a jour avec succes" });
+  } catch (err) {
+    return responseTvErrors(err, res);
   }
 };
 
@@ -80,15 +99,15 @@ const updateTV = async (req, res) => {
 const deleteTV = async (req, res) => {
   try {
     const tvId = parseInt(req.params.id, 10);
-    const tv = await TV.findOne( { id: tvId } );
+    const tv = await TV.findOne({ id: tvId });
     if (tv) {
       tv.deleteOne();
-      res.json({ message: 'TV deleted' });
+      res.json({ message: "Série TV supprimé avec succes !" });
     } else {
-      res.status(404).json({ message: 'TV not found' });
+      return responseTvErrors(404, res);
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    return responseTvErrors(err, res);
   }
 };
 

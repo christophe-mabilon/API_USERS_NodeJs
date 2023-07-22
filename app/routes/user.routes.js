@@ -1,5 +1,6 @@
-
 import {
+  editRole,
+  removeRole,
   deleteUser,
   editUserInfos,
   getAllUsersInfos,
@@ -144,9 +145,13 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *                     roles:
  *                       type: array
  *                       description: User roles.
- *                       example: ["user", "admin"]
+ *                       example: ["super-admin", "admin"]
  */
-userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
+userRouter.put(
+  "/user/:id",
+  [authJwt.verifyToken, authJwt.isSuperAdmin, authJwt.isAdmin],
+  editUserInfos
+);
 
 /**
  * @swagger
@@ -176,5 +181,71 @@ userRouter.put("/user/:id", [authJwt.verifyToken], editUserInfos);
  *                   example: User deleted successfully!
  */
 userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
+
+/**
+ * @swagger
+ * user/add/role/{:id}:
+ *   patch:
+ *     summary: Add user role
+ *     tags: [Users-Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: add User role.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success, user deleted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User updated successfully!
+ */
+userRouter.patch(
+  "user/add/role/:id",
+  [authJwt.verifyToken, authJwt.isSuperAdmin, authJwt.isAdmin],
+  editRole
+);
+
+/**
+ * @swagger
+ * user/remove/role/{:id}:
+ *   delete:
+ *     summary: Remove user role
+ *     tags: [Users-Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: add User role.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success, user deleted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User updated successfully!
+ */
+userRouter.delete(
+  "user/remove/role/:id",
+  [authJwt.verifyToken, authJwt.isSuperAdmin, authJwt.isAdmin],
+  removeRole
+);
 
 export default userRouter;

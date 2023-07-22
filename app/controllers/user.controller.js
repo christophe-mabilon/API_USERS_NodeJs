@@ -1,5 +1,5 @@
 import db from "../models/index.js";
-
+import responseErrors from "../middlewares/errorHandler.js";
 const User = db.user;
 const Role = db.role;
 
@@ -48,15 +48,10 @@ export const getAllUsersInfosSuperAdminAccess = async (req, res, next) => {
         }
         res.status(200).send(usersWithRoles);
         next();
-      } else {
-        res.status(404).send({ message: "Aucun utilisateur trouvé !" });
       }
     });
   } catch (err) {
-    res.status(500).send({
-      message:
-        "Vous n'avez pas le droit nésscesaire seul le super-admin peut consulter cette requete",
-    });
+    responseErrors.responseUsersErrors(err, res);
   }
 };
 
@@ -76,92 +71,158 @@ export const getAllUsersInfos = async (req, res) => {
           roles: roles.name,
         });
       }
-      res.status(200).send(usersWithRoles);
-    } else {
-      res.status(404).send({ message: "Aucun utilisateur trouvé !" });
+      return res.status(200).send(usersWithRoles);
     }
   } catch (err) {
-    res.status(500).send({
-      message:
-        "Vous n'avez pas le droit nésscesaire seul le admin peut consulter cette requete",
-    });
+    return responseErrors.responseUsersErrors(err, res);
   }
 };
 
 export const getUserInfos = async (req, res) => {
-  const selectedUserId = req.params.id;
-  const connectedUserId = req.auth.userId;
-  const connectedUser = await User.findById(connectedUserId);
-  const connectedRoleObject = await Role.findOne({ _id: connectedUser.roles });
-  let connectedRole = connectedRoleObject.name.toUpperCase();
-  if (connectedRole === "SUPER-ADMIN") {
-    await getUser(req, res, selectedUserId);
-  } else if (connectedRole === "ADMIN") {
-    await getUser(req, res, selectedUserId);
-  } else if (
-    connectedRole === "PROVIDER" &&
-    selectedUserId === connectedUserId
-  ) {
-    await getUser(req, res, selectedUserId);
-  } else if (connectedRole === "CLIENT" && selectedUserId === connectedUserId) {
-    await getUser(req, res, selectedUserId);
-  } else if (connectedRole === "NEW_USER") {
-    res.status(200).send({
-      message: "Vous n'avez pas les droits pour accéder à cette page !",
+  try {
+    const selectedUserId = req.params.id;
+    const connectedUserId = req.auth.userId;
+    const connectedUser = await User.findById(connectedUserId);
+    const connectedRoleObject = await Role.findOne({
+      _id: connectedUser.roles,
     });
+    let connectedRole = connectedRoleObject.name.toUpperCase();
+    if (
+      connectedRole === "SUPER-ADMIN" ||
+      connectedRole === "ADMIN" ||
+      connectedRole === "PROVIDER" ||
+      (connectedRole === "CLIENT" && selectedUserId === connectedUserId)
+    ) {
+      await getUser(req, res, selectedUserId);
+    } else if (connectedRole === "NEW_USER") {
+      return responseErrors.responseUsersErrors(401, res);
+    }
+  } catch (err) {
+    return responseErrors.responseUsersErrors(err, res);
   }
 };
-export const editUserInfos = async (req, res) => {
-  const selectedUserId = req.params.id;
-  const connectedUserId = req.auth.userId;
-  const connectedUser = await User.findById(connectedUserId);
-  const connectedRoleObject = await Role.findOne({ _id: connectedUser.roles });
-  let connectedRole = connectedRoleObject.name.toUpperCase();
-  let data = req.body;
 
-  if (connectedRole === "SUPER-ADMIN") {
-    User.updateOne({ _id: selectedUserId }, { $set: data });
-  } else if (connectedRole === "ADMIN") {
-    User.updateOne({ _id: selectedUserId }, { $set: data });
-  } else if (
-    connectedRole === "PROVIDER" &&
-    selectedUserId === connectedUserId
-  ) {
-    User.updateOne({ _id: selectedUserId }, { $set: data });
-  } else if (connectedRole === "CLIENT" && selectedUserId === connectedUserId) {
-    User.updateOne({ _id: selectedUserId }, { $set: data });
-  } else if (connectedRole === "NEW_USER") {
-    return res.status(200).send({
-      message: "Vous n'avez pas les droits pour accéder à cette page !",
+export const editUserInfos = async (req, res) => {
+  try {
+    const selectedUserId = req.params.id;
+    const connectedUserId = req.auth.userId;
+    const connectedUser = await User.findById(connectedUserId);
+    const connectedRoleObject = await Role.findOne({
+      _id: connectedUser.roles,
     });
+    let connectedRole = connectedRoleObject.name.toUpperCase();
+    let data = connectedUser;
+
+    if (connectedRole === "SUPER-ADMIN") {
+      data.roles.push(connectedRole);
+    } else if (connectedRole === "ADMIN") {
+      data.roles.push(connectedRole);
+    } else if (
+      connectedRole === "PROVIDER" &&
+      selectedUserId === connectedUserId
+    ) {
+      data.roles.push(connectedRole);
+    } else if (
+      connectedRole === "CLIENT" &&
+      selectedUserId === connectedUserId
+    ) {
+      data.roles.push(connectedRole);
+    } else if (connectedRole === "NEW_USER") {
+      return responseErrors.responseUsersErrors(401, res);
+    }
+    User.updateOne({ _id: selectedUserId }, { $set: data });
+    return res
+      .status(200)
+      .send({ message: "Utilisateur modifié avec succès !" });
+  } catch (err) {
+    return responseErrors.responseUsersErrors(err, res);
   }
-  return res.status(200).send({ message: "Utilisateur modifié avec succès !" });
 };
 
 export const deleteUser = async (req, res) => {
-  const selectedUserId = req.params.id;
-  const connectedUserId = req.auth.userId;
-  const connectedUser = await User.findById(connectedUserId);
-  const connectedRoleObject = await Role.findOne({ _id: connectedUser.roles });
-  let connectedRole = connectedRoleObject.name.toUpperCase();
-
-  if (connectedRole === "SUPER-ADMIN" || connectedRole === "ADMIN") {
-    await User.findByIdAndDelete(selectedUserId);
-    return res.status(200).send({ message: "Utilisateur supprimé avec succès !" });
-  } else if (
-    (connectedRole === "PROVIDER" || connectedRole === "CLIENT" || connectedRole === "NEW_USER") &&
-    selectedUserId === connectedUserId
-  ) {
-    return res.status(403).send({
-      message: "Vous n'avez pas les droits pour accéder à cette page !",
+  try {
+    const selectedUserId = req.params.id;
+    const connectedUserId = req.auth.userId;
+    const connectedUser = await User.findById(connectedUserId);
+    const connectedRoleObject = await Role.findOne({
+      _id: connectedUser.roles,
     });
-  }
+    let connectedRole = connectedRoleObject.name.toUpperCase();
 
-  return res.status(403).send({
-    message: "Vous n'avez pas les droits pour supprimer cet utilisateur !",
-  });
+    if (connectedRole === "SUPER-ADMIN" || connectedRole === "ADMIN") {
+      await User.findByIdAndDelete(selectedUserId);
+      return res
+        .status(200)
+        .send({ message: "Utilisateur supprimé avec succès !" });
+    } else if (
+      (connectedRole === "PROVIDER" ||
+        connectedRole === "CLIENT" ||
+        connectedRole === "NEW_USER") &&
+      selectedUserId === connectedUserId
+    ) {
+      return responseErrors.responseUsersErrors(401, res);
+    }
+  } catch (err) {
+    responseErrors.responseUsersErrors(err, res);
+  }
 };
 
-export const changeRole = (req, res) => {
-  res.status(200).send("change Role");
+export const editRole = async (req, res) => {
+  try {
+    const selectedUserId = req.params.id;
+    const connectedUserId = req.auth.userId;
+    const connectedUser = await User.findById(connectedUserId);
+    const connectedRoleObject = await Role.findOne({
+      _id: connectedUser.roles,
+    });
+    let data = connectedUser;
+    let connectedRole = connectedRoleObject.name.toUpperCase();
+    if (connectedRole === "SUPER-ADMIN" && !data.includes(connectedRole)) {
+      data.roles.push(connectedRole);
+    } else if (connectedRole === "ADMIN" && !data.includes(connectedRole)) {
+      data.roles.push(connectedRole);
+    } else if (connectedRole === "PROVIDER" && !data.includes(connectedRole)) {
+      data.roles.push(connectedRole);
+    } else if (connectedRole === "CLIENT" && !data.includes(connectedRole)) {
+      data.roles.push(connectedRole);
+    } else if (connectedRole === "NEW_USER") {
+      return responseErrors.responseUsersErrors(401, res);
+    }
+    User.updateOne({ _id: selectedUserId }, { $set: data });
+    return res
+      .status(200)
+      .send({ message: "Utilisateur modifié avec succès !" });
+  } catch (err) {
+    responseErrors.responseUsersErrors(err, res);
+  }
+};
+
+export const removeRole = async (req, res) => {
+  try {
+    const selectedUserId = req.params.id;
+    const connectedUserId = req.auth.userId;
+    const connectedUser = await User.findById(connectedUserId);
+    const connectedRoleObject = await Role.findOne({
+      _id: connectedUser.roles,
+    });
+    let connectedRole = connectedRoleObject.name.toUpperCase();
+    let data = connectedUser;
+    if (connectedRole === "SUPER-ADMIN" && data.includes(connectedRole)) {
+      data.roles = data.roles.filter((role) => role != "SUPER-ADMIN");
+    } else if (connectedRole === "ADMIN" && data.includes(connectedRole)) {
+      data.roles = data.roles.filter((role) => role != "ADMIN");
+    } else if (connectedRole === "PROVIDER" && data.includes(connectedRole)) {
+      data.roles = data.roles.filter((role) => role != "PROVIDER");
+    } else if (connectedRole === "CLIENT" && data.includes(connectedRole)) {
+      data.roles = data.roles.filter((role) => role != "CLIENT");
+    } else if (connectedRole === "NEW_USER") {
+      return responseErrors.responseUsersErrors(401, res);
+    }
+    User.updateOne({ _id: selectedUserId }, { $set: data });
+    return res
+      .status(200)
+      .send({ message: "Utilisateur modifié avec succès !" });
+  } catch (err) {
+    responseErrors.responseUsersErrors(err, res);
+  }
 };

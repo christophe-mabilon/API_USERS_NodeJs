@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import db from "../models/index.js";
 import dotenv from "dotenv";
+import { responseJwtErrors } from "../middlewares/errorHandler.js";
 
 dotenv.config();
 const User = db.user;
@@ -20,31 +21,19 @@ function generateRefreshToken(user) {
 
 const verifyToken = async (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decodedToken.id;
-    req.auth = {
-      userId: userId,
-    };
-    next();
-  } catch (err) {
-    switch (err.statusCode) {
-      case 401:
-        return err.status(401).send({ message: "Non autorisé !" });
-      case 403:
-        return res
-          .status(403)
-          .send({ message: `Nécessite le rôle de ${definedRole} !` });
-      case 404:
-        return res
-          .status(403)
-          .send({ message: `Nécessite le rôle de ${definedRole} !` });
-      default:
-        return res.status(500).send({
-          message:
-            "Vous n'avez pas le droit nésscesaire seul le admin peut consulter cette requete",
-        });
+    const token = req?.headers?.authorization?.split(" ")[1];
+    if (token) {
+      const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      const userId = decodedToken.id;
+      req.auth = {
+        userId: userId,
+      };
+      next();
+    } else {
+      responseJwtErrors(401,res);
     }
+  } catch (err) {
+    responseJwtErrors(err,res);
   }
 };
 
@@ -58,7 +47,7 @@ const isSuperAdmin = async (req, res, next) => {
       next();
     }
   } catch (err) {
-    switch (err.statusCode) {
+    switch (err.status) {
       case 401:
         return err.status(401).send({ message: "Non autorisé !" });
       case 403:
@@ -76,15 +65,20 @@ const isSuperAdmin = async (req, res, next) => {
 };
 
 const isAdmin = async (req, res, next) => {
+  const parentRole = "super-admin";
   const definedRole = "admin";
+
   const userId = req.auth.userId;
   try {
     const user = await User.findById(userId);
     const role = await Role.findOne({ _id: user.roles[0] });
-    if (role.name.toUpperCase() === definedRole.toUpperCase()) {
+    if (
+      role.name.toUpperCase() === definedRole.toUpperCase() ||
+      role.name.toUpperCase() === parentRole
+    ) {
       return next();
     }
-    switch (err.statusCode) {
+    switch (err.status) {
       case 403:
         return res
           .status(403)
@@ -109,7 +103,7 @@ const isClient = async (req, res, next) => {
       next();
     }
   } catch (err) {
-    switch (err.statusCode) {
+    switch (err.status) {
       case 403:
         return res
           .status(403)
@@ -132,7 +126,7 @@ const isProvider = async (req, res, next) => {
       next();
     }
   } catch (err) {
-    switch (err.statusCode) {
+    switch (err.status) {
       case 403:
         return res
           .status(403)
@@ -155,7 +149,7 @@ const isNewUser = async (req, res, next) => {
       next();
     }
   } catch (err) {
-    switch (err.statusCode) {
+    switch (err.status) {
       case 403:
         return res
           .status(403)
