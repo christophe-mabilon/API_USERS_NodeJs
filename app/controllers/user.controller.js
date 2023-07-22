@@ -2,6 +2,7 @@ import db from "../models/index.js";
 import responseErrors from "../middlewares/errorHandler.js";
 const User = db.user;
 const Role = db.role;
+const TV = db.tv;
 
 async function getUser(req, res, userId) {
   let user = await User.findById(userId);
@@ -222,6 +223,141 @@ export const removeRole = async (req, res) => {
     return res
       .status(200)
       .send({ message: "Utilisateur modifié avec succès !" });
+  } catch (err) {
+    responseErrors.responseUsersErrors(err, res);
+  }
+};
+
+export const getAllTvByUser = async (req, res) => {
+  try {
+    const selectedUserId = req.params.userId;
+    const selectedUser = await User.findById(selectedUserId);
+    const userTv = selectedUser.tv;
+    return res.status(200).send(userTv);
+  } catch (err) {
+    responseErrors.responseUsersErrors(err, res);
+  }
+};
+
+export const addTVToUser = async (req, res) => {
+  try {
+    const selectedUserId = req.params.userId;
+    const selectedUser = await User.findById(selectedUserId);
+
+    const tvId = req.params.tvId;
+    const selectedTv = await TV.findById(tvId);
+
+    if (!selectedUser || !selectedTv) {
+      responseErrors.responseUsersErrors(404, res);
+    }
+
+    // Check if the TV show is already in the user's TV array
+    if (selectedUser.tv.includes(selectedTv._id)) {
+      responseErrors.responseUsersErrors(400, res);
+    }
+
+    // Add the TV show ID to the user's TV array
+    selectedUser.tv.push(selectedTv._id);
+
+    // Save the updated user document
+    await selectedUser.save();
+    return res
+      .status(200)
+      .json({ message: "La série TV a été ajoutée avec succes!" });
+  } catch (err) {
+    responseErrors.responseUsersErrors(err, res);
+  }
+};
+
+export const editTvUser = async (req, res) => {
+  try {
+    const selectedUserId = req.params.userId;
+    const selectedUser = await User.findById(selectedUserId);
+
+    const tvId = req.params.tvId;
+
+    // Find the index of the TV show in the user's TV array
+    const tvIndex = selectedUser.tv.findIndex((tv) => tv.equals(tvId));
+
+    // Check if the TV show is associated with the user
+    if (tvIndex === -1) {
+      return res.status(404).json({ error: "TV show not found for the user." });
+    }
+    // Get the TV show object from the user's TV array
+    const selectedTv = selectedUser.tv[tvIndex];
+
+    const {
+      id,
+      name,
+      original_name,
+      overview,
+      tagline,
+      in_production,
+      status,
+      original_language,
+      origin_country,
+      created_by,
+      first_air_date,
+      last_air_date,
+      number_of_episodes,
+      number_of_seasons,
+      production_companies,
+      poster_path,
+      vote_average,
+      vote_count,
+      popularity,
+    } = req.body;
+
+    if (id) tv.id = id;
+    if (name) tv.name = name;
+    if (original_name) tv.original_name = original_name;
+    if (overview) tv.overview = overview;
+    if (tagline) tv.tagline = tagline;
+    if (in_production) tv.in_production = in_production;
+    if (status) tv.status = status;
+    if (original_language) tv.original_language = original_language;
+    if (origin_country) tv.origin_country = origin_country;
+    if (created_by) tv.created_by = created_by;
+    if (first_air_date) tv.first_air_date = first_air_date;
+    if (last_air_date) tv.last_air_date = last_air_date;
+    if (number_of_episodes) tv.number_of_episodes = number_of_episodes;
+    if (number_of_seasons) tv.number_of_seasons = number_of_seasons;
+    if (production_companies) tv.production_companies = production_companies;
+    if (poster_path) tv.poster_path = poster_path;
+    if (vote_average) tv.vote_average = vote_average;
+    if (vote_count) tv.vote_count = vote_count;
+    if (popularity) tv.popularity = popularity;
+
+    // Sauve data
+    await tv.save();
+    res.json({ message: "Série TV mis a jour avec succes" });
+  } catch (err) {
+    responseErrors.responseUsersErrors(err, res);
+  }
+};
+
+export const deleteTvTuser = async (req, res) => {
+  try {
+    const selectedUserId = req.params.userId;
+    const selectedUser = await User.findById(selectedUserId);
+
+    const tvId = req.params.tvId;
+
+    // Find the index of the TV show in the user's TV array
+    const tvIndex = selectedUser.tv.findIndex((tv) => tv.equals(tvId));
+
+    // Check if the TV show is associated with the user
+    if (tvIndex === -1) {
+      responseErrors.responseUsersErrors(404, res);
+    }
+
+    // Remove the TV show from the user's TV array
+    selectedUser.tv.splice(tvIndex, 1);
+
+    // Save the updated user document
+    await selectedUser.save();
+
+    return res.status(200).json({ message: "Série TV supprimé avec succes !" });
   } catch (err) {
     responseErrors.responseUsersErrors(err, res);
   }
