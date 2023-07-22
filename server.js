@@ -45,10 +45,174 @@ const swaggerOptions = {
       bearerAuth: [],
     },
   ],
+  tags: [
+    {
+      name: "Users",
+      description: "API endpoints for managing users",
+    },
+    {
+      name: "Roles",
+      description: "API endpoints for managing roles",
+    },
+    {
+      name: "TV",
+      description: "API endpoints for managing TV shows",
+    },
+  ],
+  definitions: {
+    User: {
+      type: "object",
+      properties: {
+        username: {
+          type: "string",
+        },
+        email: {
+          type: "string",
+        },
+        password: {
+          type: "string",
+        },
+        roles: {
+          type: "array",
+          items: {
+            type: "string",
+          },
+        },
+        tv: {
+          type: "array",
+          items: {
+            type: "string",
+          },
+        },
+      },
+    },
+    Role: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+        },
+      },
+    },
+    TV: {
+      type: "object",
+      properties: {
+        id: {
+          type: "integer",
+          format: "int64",
+        },
+        name: {
+          type: "string",
+        },
+      },
+    },
+  },
+  paths: {
+    "/api/users": {
+      get: {
+        tags: ["Users"],
+        summary: "Get all users",
+        responses: {
+          200: {
+            description: "Successful operation",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/definitions/User",
+                  },
+                },
+                example: [
+                  {
+                    username: "user1",
+                    email: "user1@example.com",
+                    roles: ["role1"],
+                    tv: ["tv_id1", "tv_id2"],
+                  },
+                  {
+                    username: "user2",
+                    email: "user2@example.com",
+                    roles: ["role2"],
+                    tv: ["tv_id2", "tv_id3"],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      // Add other routes for users here...
+    },
+    "/api/roles": {
+      get: {
+        tags: ["Roles"],
+        summary: "Get all roles",
+        responses: {
+          200: {
+            description: "Successful operation",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/definitions/Role",
+                  },
+                },
+                example: [
+                  {
+                    name: "role1",
+                  },
+                  {
+                    name: "role2",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      // Add other routes for roles here...
+    },
+    "/api/tv": {
+      get: {
+        tags: ["TV"],
+        summary: "Get all TV shows",
+        responses: {
+          200: {
+            description: "Successful operation",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/definitions/TV",
+                  },
+                },
+                example: [
+                  {
+                    id: 1,
+                    name: "TV Show 1",
+                    // Add other properties here...
+                  },
+                  {
+                    id: 2,
+                    name: "TV Show 2",
+                    // Add other properties here...
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      // Add other routes for TV shows here...
+    },
+  },
 };
 const app = express();
 const swaggerDocs = swaggerJsDoc(swaggerOptions); // swagger configuration
-const TV = db.tv
+const TV = db.tv;
 const corsOptions = {
   origin: "http://localhost:8081",
 };
@@ -63,7 +227,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRouter);
 app.use("/api", userRouter);
-app.use('/api/tv', tvRouter);
+app.use("/api/tv", tvRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // swagger route
 const Role = db.role;
 
@@ -141,12 +305,12 @@ async function initial() {
 }
 
 async function logTVCount() {
-    try {
-      const count = await TV.countDocuments();
-      console.log(`Nombre d'ID dans la collection "tv" : ${count}`);
-    } catch (err) {
-      console.error("Erreur lors du comptage des documents :", err);
-    }
+  try {
+    const count = await TV.countDocuments();
+    console.log(`Nombre d'ID dans la collection "tv" : ${count}`);
+  } catch (err) {
+    console.error("Erreur lors du comptage des documents :", err);
   }
+}
 
-  logTVCount();
+logTVCount();

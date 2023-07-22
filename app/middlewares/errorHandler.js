@@ -61,7 +61,7 @@ export async function responseRoleErrors(req, res) {
 }
 
 export async function responseTvErrors(req, res) {
-  switch (req.status) {
+  switch (req) {
     case 400:
       return res.status(400).send({
         message: "La syntaxe de la requête est erronée. !",
@@ -88,6 +88,8 @@ export async function responseTvErrors(req, res) {
       return res.status(500).send({
         message: "Erreur server",
       });
+    default:
+      return res.send({ req });
   }
 }
 

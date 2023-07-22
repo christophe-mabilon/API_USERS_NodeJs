@@ -1,11 +1,11 @@
 import db from "../models/index.js";
-import responseTvErrors from "../middlewares/errorHandler.js";
+import { responseTvErrors } from "../middlewares/errorHandler.js";
 
 const TV = db.tv;
 
 const getAllTV = async (req, res) => {
   try {
-    const tvList = await TV.find().limit(100);
+    const tvList = await TV.find();
     res.json(tvList);
   } catch (err) {
     return responseTvErrors(err, res);
@@ -15,8 +15,8 @@ const getAllTV = async (req, res) => {
 // Obtenir un document TV par son ID
 const getTVById = async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    const tv = await TV.findOne({ id: id });
+    const id = req.params.id;
+    const tv = await TV.findById(id);
     if (tv) {
       res.json(tv);
     }
@@ -30,7 +30,7 @@ const createTV = async (req, res) => {
   try {
     const tv = new TV(req.body);
     await tv.save();
-    res.status(201).json({ message: "Série TV saubegardée avec succes !" });
+    res.status(201).json({ message: "Série TV sauvegardée avec succes !" });
   } catch (err) {
     return responseTvErrors(err, res);
   }
@@ -38,8 +38,8 @@ const createTV = async (req, res) => {
 
 const updateTV = async (req, res) => {
   try {
-    const tvId = parseInt(req.params.id, 10);
-    const tv = await TV.findOne({ id: tvId });
+    const tvId = req.params.id;
+    const tv = await TV.findById(tvId);
 
     if (!tv) {
       return responseTvErrors(404, res);
@@ -98,8 +98,8 @@ const updateTV = async (req, res) => {
 // Supprimer un document TV
 const deleteTV = async (req, res) => {
   try {
-    const tvId = parseInt(req.params.id, 10);
-    const tv = await TV.findOne({ id: tvId });
+    const tvId = req.params.id;
+    const tv = await TV.findById(tvId);
     if (tv) {
       tv.deleteOne();
       res.json({ message: "Série TV supprimé avec succes !" });

@@ -146,6 +146,11 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *                       type: array
  *                       description: User roles.
  *                       example: ["super-admin", "admin"]
+ *     
+ *       404:
+ *         description: Error, User not found
+ *       500:
+ *         description: Error message
  */
 userRouter.put(
   "/user/:id",
@@ -185,7 +190,7 @@ userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
 /**
  * @swagger
  * user/add/role/{:id}:
- *   patch:
+ *   post:
  *     summary: Add user role
  *     tags: [Users-Roles]
  *     security:
@@ -209,7 +214,7 @@ userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
  *                   type: string
  *                   example: User updated successfully!
  */
-userRouter.patch(
+userRouter.post(
   "user/add/role/:id",
   [authJwt.verifyToken, authJwt.isSuperAdmin, authJwt.isAdmin],
   editRole
