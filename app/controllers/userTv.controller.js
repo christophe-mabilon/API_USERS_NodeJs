@@ -1,19 +1,21 @@
 import db from "../models/index.js";
-import responseErrors, {responseUsersErrors} from "../middlewares/errorHandler.js";
+import responseErrors from "../middlewares/errorHandler.js";
 const User = db.user;
 const TV = db.tv;
 
 export const getAllTvByUser = async (req, res) => {
   try {
     const selectedUserId = req.params.userId;
-    const selectedUser = await User.findById(selectedUserId).populate("tv").exec();
+    const selectedUser = await User.findById(selectedUserId)
+      .populate("tv")
+      .exec();
     if (!selectedUser) {
-      await responseErrors.responseUsersErrors(404,res)
+      await responseErrors.responseUsersErrors(404, res);
     }
     const selectedTv = selectedUser.tv;
     return res.status(200).json(selectedTv);
   } catch (err) {
-    await responseErrors.responseTvErrors(500,res);
+    await responseErrors.responseTvErrors(500, res);
   }
 };
 
@@ -41,7 +43,9 @@ export const addTVToUser = async (req, res) => {
 
         // Save the updated user document
         await selectedUser.save();
-        return res.status(200).json({ message: "La série TV a été ajoutée avec succès!" });
+        return res
+          .status(200)
+          .json({ message: "La série TV a été ajoutée avec succès!" });
       }
     }
   } catch (err) {
@@ -56,10 +60,10 @@ export const deleteTvTuser = async (req, res) => {
     const tvId = req.params.tvId;
 
     if (!selectedUser || !tvId) {
-      if(!selectedUser){
-        await responseErrors.responseUsersErrors(404,res);
-      }else{
-        await responseErrors.responseTvErrors(404,res);
+      if (!selectedUser) {
+        await responseErrors.responseUsersErrors(404, res);
+      } else {
+        await responseErrors.responseTvErrors(404, res);
       }
     }
 
@@ -79,6 +83,6 @@ export const deleteTvTuser = async (req, res) => {
 
     return res.status(200).json({ message: "Série TV supprimé avec succes !" });
   } catch (err) {
-    await responseErrors.responseTvErrors(500,res);
+    await responseErrors.responseTvErrors(500, res);
   }
 };
