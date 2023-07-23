@@ -1,5 +1,5 @@
 export async function responseUsersErrors(req, res) {
-  switch (req.status) {
+  switch (req) {
     case 400:
       return res.status(400).send({
         message: "La syntaxe de la requête est erronée. !",
@@ -64,7 +64,7 @@ export async function responseTvErrors(req, res) {
   switch (req) {
     case 400:
       return res.status(400).send({
-        message: "La syntaxe de la requête est erronée. !",
+        message: "L'utilisateur à déja cette série TV !",
       });
     case 401:
       return res.status(401).send({
@@ -86,7 +86,7 @@ export async function responseTvErrors(req, res) {
       });
     case 500:
       return res.status(500).send({
-        message: "Erreur server",
+        message: "Erreur interne server",
       });
     default:
       return res.send({ req });

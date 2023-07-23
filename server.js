@@ -3,6 +3,7 @@ import cors from "cors";
 import db from "./app/models/index.js";
 import authRouter from "./app/routes/auth.routes.js";
 import userRouter from "./app/routes/user.routes.js";
+import userTvRouter from "./app/routes/userTv.routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 import dotenv from "dotenv";
@@ -226,7 +227,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRouter);
-app.use("/api", userRouter);
+app.use("/api/", userRouter);
+app.use("/api/usersTv", userTvRouter);
 app.use("/api/tv", tvRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // swagger route
 const Role = db.role;

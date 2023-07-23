@@ -15,7 +15,7 @@ const User = mongoose.model(
     tv: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "tv"
+        ref: "TV"
       }
     ]
   })
