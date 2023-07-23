@@ -34,31 +34,53 @@ async function addRoleToUser(userId, role) {
  */
 export const getAllUsersInfosSuperAdminAccess = async (req, res, next) => {
   try {
-    await User.find().then(async (users) => {
-      if (users.length !== 0) {
-        const usersWithRoles = [];
-        for (const element of users) {
-          const user = element;
-          const roles = await getRole(user._id);
-          usersWithRoles.push({
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            roles: roles.name,
-          });
-        }
-        res.status(200).send(usersWithRoles);
-        next();
+    const { page = 1, perPage = 10 } = req.query;
+
+    const totalUsersCount = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsersCount / perPage);
+
+    const users = await User.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+
+    if (users.length !== 0) {
+      const usersWithRoles = [];
+      for (const user of users) {
+        const roles = await getRole(user._id);
+        usersWithRoles.push({
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          roles: roles.name,
+        });
       }
-    });
+
+      const response = {
+        totalUsers: totalUsersCount,
+        totalPages,
+        currentPage: page,
+        users: usersWithRoles,
+      };
+
+      res.status(200).json(response);
+    } else {
+      responseErrors.responseUsersErrors(404, res);
+    }
   } catch (err) {
-    responseErrors.responseUsersErrors(err, res);
+    responseErrors.responseUsersErrors(500, res);
   }
 };
 
 export const getAllUsersInfos = async (req, res) => {
   try {
-    const users = await User.find();
+    const { page = 1, perPage = 10 } = req.query;
+
+    const totalUsersCount = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsersCount / perPage);
+
+    const users = await User.find()
+      .skip((page - 1) * perPage)
+      .limit(perPage);
 
     if (users.length !== 0) {
       const usersWithRoles = [];
@@ -73,9 +95,11 @@ export const getAllUsersInfos = async (req, res) => {
         });
       }
       return res.status(200).send(usersWithRoles);
+    } else {
+      responseErrors.responseUsersErrors(404, res);
     }
   } catch (err) {
-    return responseErrors.responseUsersErrors(err, res);
+    return responseErrors.responseUsersErrors(500, res);
   }
 };
 
@@ -84,9 +108,18 @@ export const getUserInfos = async (req, res) => {
     const selectedUserId = req.params.id;
     const connectedUserId = req.auth.userId;
     const connectedUser = await User.findById(connectedUserId);
+    if (!connectedUser) {
+      return responseErrors.responseUsersErrors(404, res);
+    }
+
     const connectedRoleObject = await Role.findOne({
       _id: connectedUser.roles,
     });
+
+    if (!connectedRoleObject) {
+      return responseErrors.responseRoleErrors(404, res);
+    }
+
     let connectedRole = connectedRoleObject.name.toUpperCase();
     if (
       connectedRole === "SUPER-ADMIN" ||
@@ -99,7 +132,7 @@ export const getUserInfos = async (req, res) => {
       return responseErrors.responseUsersErrors(401, res);
     }
   } catch (err) {
-    return responseErrors.responseUsersErrors(err, res);
+    return responseErrors.responseUsersErrors(500, res);
   }
 };
 
@@ -108,9 +141,18 @@ export const editUserInfos = async (req, res) => {
     const selectedUserId = req.params.id;
     const connectedUserId = req.auth.userId;
     const connectedUser = await User.findById(connectedUserId);
+
+    if (!connectedUser) {
+      return responseErrors.responseUsersErrors(404, res);
+    }
+
     const connectedRoleObject = await Role.findOne({
       _id: connectedUser.roles,
     });
+
+    if (!connectedRoleObject) {
+      return responseErrors.responseRoleErrors(404, res);
+    }
     let connectedRole = connectedRoleObject.name.toUpperCase();
     let data = connectedUser;
 
@@ -136,7 +178,7 @@ export const editUserInfos = async (req, res) => {
       .status(200)
       .send({ message: "Utilisateur modifié avec succès !" });
   } catch (err) {
-    return responseErrors.responseUsersErrors(err, res);
+    return responseErrors.responseUsersErrors(500, res);
   }
 };
 
@@ -145,9 +187,19 @@ export const deleteUser = async (req, res) => {
     const selectedUserId = req.params.id;
     const connectedUserId = req.auth.userId;
     const connectedUser = await User.findById(connectedUserId);
+
+    if (!connectedUser) {
+      return responseErrors.responseUsersErrors(404, res);
+    }
+
     const connectedRoleObject = await Role.findOne({
       _id: connectedUser.roles,
     });
+
+    if (!connectedRoleObject) {
+      return responseErrors.responseRoleErrors(404, res);
+    }
+
     let connectedRole = connectedRoleObject.name.toUpperCase();
 
     if (connectedRole === "SUPER-ADMIN" || connectedRole === "ADMIN") {
@@ -164,7 +216,7 @@ export const deleteUser = async (req, res) => {
       return responseErrors.responseUsersErrors(401, res);
     }
   } catch (err) {
-    responseErrors.responseUsersErrors(err, res);
+    responseErrors.responseUsersErrors(500, res);
   }
 };
 
@@ -173,9 +225,19 @@ export const editRole = async (req, res) => {
     const selectedUserId = req.params.id;
     const connectedUserId = req.auth.userId;
     const connectedUser = await User.findById(connectedUserId);
+
+    if (!connectedUser) {
+      return responseErrors.responseUsersErrors(404, res);
+    }
+
     const connectedRoleObject = await Role.findOne({
       _id: connectedUser.roles,
     });
+
+    if (!connectedRoleObject) {
+      return responseErrors.responseRoleErrors(404, res);
+    }
+
     let data = connectedUser;
     let connectedRole = connectedRoleObject.name.toUpperCase();
     if (connectedRole === "SUPER-ADMIN" && !data.includes(connectedRole)) {
@@ -194,7 +256,7 @@ export const editRole = async (req, res) => {
       .status(200)
       .send({ message: "Utilisateur modifié avec succès !" });
   } catch (err) {
-    responseErrors.responseUsersErrors(err, res);
+    responseErrors.responseUsersErrors(500, res);
   }
 };
 
@@ -224,7 +286,6 @@ export const removeRole = async (req, res) => {
       .status(200)
       .send({ message: "Utilisateur modifié avec succès !" });
   } catch (err) {
-    responseErrors.responseUsersErrors(err, res);
+    responseErrors.responseUsersErrors(500, res);
   }
 };
-

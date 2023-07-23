@@ -124,20 +124,6 @@ const swaggerOptions = {
                     $ref: "#/definitions/User",
                   },
                 },
-                example: [
-                  {
-                    username: "user1",
-                    email: "user1@example.com",
-                    roles: ["role1"],
-                    tv: ["tv_id1", "tv_id2"],
-                  },
-                  {
-                    username: "user2",
-                    email: "user2@example.com",
-                    roles: ["role2"],
-                    tv: ["tv_id2", "tv_id3"],
-                  },
-                ],
               },
             },
           },
@@ -160,14 +146,6 @@ const swaggerOptions = {
                     $ref: "#/definitions/Role",
                   },
                 },
-                example: [
-                  {
-                    name: "role1",
-                  },
-                  {
-                    name: "role2",
-                  },
-                ],
               },
             },
           },
@@ -190,24 +168,11 @@ const swaggerOptions = {
                     $ref: "#/definitions/TV",
                   },
                 },
-                example: [
-                  {
-                    id: 1,
-                    name: "TV Show 1",
-                    // Add other properties here...
-                  },
-                  {
-                    id: 2,
-                    name: "TV Show 2",
-                    // Add other properties here...
-                  },
-                ],
               },
             },
           },
         },
       },
-      // Add other routes for TV shows here...
     },
   },
 };

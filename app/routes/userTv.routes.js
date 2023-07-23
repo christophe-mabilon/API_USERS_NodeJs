@@ -13,16 +13,28 @@ const userTvRouter = express.Router();
  *   get:
  *     summary: Get all TV shows for a specific user
  *     tags: [User-TV]
- *     description: Retrieve all TV shows associated with a user by user ID.
+ *     description: Retrieve all TV shows associated with a user by user ID with pagination.
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: userId
+ *       - name: userId
+ *         in: path
  *         schema:
  *           type: string
  *         required: true
  *         description: The ID of the user.
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number for pagination.
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: The number of items per page.
  *     responses:
  *       200:
  *         description: A list of TV shows for the user.

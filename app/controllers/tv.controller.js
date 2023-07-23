@@ -5,8 +5,39 @@ const TV = db.tv;
 
 const getAllTV = async (req, res) => {
   try {
-    const tvList = await TV.find();
-    res.json(tvList);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const tvList = await TV.find().skip(startIndex).limit(limit);
+    
+    // Get the total count of TV shows
+    const totalTVCount = await TV.countDocuments();
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(totalTVCount / limit);
+
+    // Create a pagination object to include in the response
+    const pagination = {
+      totalItems: totalTVCount,
+      totalPages,
+      currentPage: page,
+      itemsPerPage: limit,
+    };
+
+    // Check if there are more pages
+    if (endIndex < totalTVCount) {
+      pagination.nextPage = page + 1;
+    }
+
+    // Check if there are previous pages
+    if (startIndex > 0) {
+      pagination.previousPage = page - 1;
+    }
+
+    res.json({ tvList, pagination });
   } catch (err) {
     return responseTvErrors(err, res);
   }

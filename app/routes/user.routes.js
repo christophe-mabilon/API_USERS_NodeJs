@@ -16,10 +16,26 @@ const userRouter = express.Router();
  * @swagger
  * /api/super-admin/users:
  *   get:
- *     summary: Get all users' information for super-admin access only.
+ *     summary: Get all users' information for super-admin access only with pagination.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: The page number.
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: The number of results per page.
  *     responses:
  *       200:
  *         description: Success, returns all admin users' information.
@@ -40,8 +56,26 @@ userRouter.get(
  * @swagger
  * /api/admin/users:
  *   get:
- *     summary: Get all users' information for admin access only.
+ *     summary: Get all users' information for admin access only with pagination.
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: The page number.
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: The number of results per page.
  *     responses:
  *       200:
  *         description: Success, returns all admin users' information.

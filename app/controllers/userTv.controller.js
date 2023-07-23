@@ -6,12 +6,23 @@ const TV = db.tv;
 export const getAllTvByUser = async (req, res) => {
   try {
     const selectedUserId = req.params.userId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
     const selectedUser = await User.findById(selectedUserId)
-      .populate("tv")
+      .populate({
+        path: "tv",
+        options: {
+          skip: (page - 1) * limit,
+          limit: limit,
+        },
+      })
       .exec();
+      
     if (!selectedUser) {
       await responseErrors.responseUsersErrors(404, res);
     }
+
     const selectedTv = selectedUser.tv;
     return res.status(200).json(selectedTv);
   } catch (err) {

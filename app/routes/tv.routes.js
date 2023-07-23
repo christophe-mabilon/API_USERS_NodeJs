@@ -12,6 +12,19 @@ const router = express.Router();
  *     tags: [TV-show]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number for pagination.
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: The number of items per page.
  *     responses:
  *       200:
  *         description: Success, returns a list of TV shows
