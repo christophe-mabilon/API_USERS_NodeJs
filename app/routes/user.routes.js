@@ -6,6 +6,7 @@ import {
   getAllUsersInfos,
   getAllUsersInfosSuperAdminAccess,
   getUserInfos,
+  getUserById,
 } from "../controllers/user.controller.js";
 import express from "express";
 import authJwt from "../middlewares/authJwt.js";
@@ -139,7 +140,15 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  * /api/user/{id}:
  *   put:
  *     summary: Edit user information.
- *     tags: [Users]
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: User ID to patch.
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -147,12 +156,21 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               username:
  *                 type: string
- *                 description: The user's name.
- *                 example: Leanne Graham
- *     security:
- *       - bearerAuth: []
+ *                 description: The user's username.
+ *                 example: bertrand_test
+ *               email:
+ *                 type: string
+ *                 description: The user's email.
+ *                 example: bertrand@test.fr
+ *               roles:
+ *                 type: array
+ *                 description: User roles.
+ *                 items:
+ *                   type: string
+ *                   format: string
+ *                   example: super-admin
  *     responses:
  *       200:
  *         description: Success, user information updated.
@@ -180,7 +198,6 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  *                       type: array
  *                       description: User roles.
  *                       example: ["super-admin", "admin"]
- *
  *       404:
  *         description: Error, User not found
  *       500:
@@ -188,7 +205,7 @@ userRouter.get("/user/:id", [authJwt.verifyToken], getUserInfos);
  */
 userRouter.put(
   "/user/:id",
-  [authJwt.verifyToken, authJwt.isSuperAdmin, authJwt.isAdmin],
+  [authJwt.verifyToken, authJwt.isAdmin],
   editUserInfos
 );
 
@@ -223,22 +240,33 @@ userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
 
 /**
  * @swagger
- * /api/user/add/role/{:id}:
+ * /api/user/{userId}/add/role:
  *   post:
  *     summary: Add user role
  *     tags: [Users-Roles]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
+ *       - name: userId
  *         in: path
  *         required: true
- *         description: add User role.
+ *         description: User ID for adding the role.
  *         schema:
  *           type: string
+ *       - name: role
+ *         in: body
+ *         required: true
+ *         description: Role object to be added to the user.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             role:
+ *               type: string
+ *               example: "admin"
+ *               description: The role to be added to the user.
  *     responses:
  *       200:
- *         description: Success, user deleted.
+ *         description: Success, user updated.
  *         content:
  *           application/json:
  *             schema:
@@ -249,8 +277,8 @@ userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
  *                   example: User updated successfully!
  */
 userRouter.post(
-  "/user/add/role/:id",
-  [authJwt.verifyToken, authJwt.isSuperAdmin, authJwt.isAdmin],
+  "/user/:userId/add/role",
+  [authJwt.verifyToken, authJwt.isSuperAdmin || authJwt.isAdmin],
   editRole
 );
 

@@ -23,6 +23,7 @@ export async function responseUsersErrors(req, res) {
         message: "Aucun utilisateur trouvé !",
       });
     case 500:
+    
       return res.status(500).send({
         message: "Erreur server",
       });

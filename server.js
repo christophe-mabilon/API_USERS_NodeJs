@@ -8,6 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 import dotenv from "dotenv";
 import tvRouter from "./app/routes/tv.routes.js";
+import bodyParser from "body-parser";
 dotenv.config();
 
 const swaggerOptions = {
@@ -184,7 +185,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
+app.use(bodyParser.json());
 // parse requests of content-type - application/json
 app.use(express.json());
 

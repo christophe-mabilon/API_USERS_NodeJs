@@ -34,7 +34,10 @@ async function addRoleToUser(userId, role) {
  */
 export const getAllUsersInfosSuperAdminAccess = async (req, res, next) => {
   try {
-    const { page = 1, perPage = 10 } = req.query;
+    const {
+      page = req.page ? req.page : 1,
+      perPage = req.perPage ? req.perPage : 10,
+    } = req.query;
 
     const totalUsersCount = await User.countDocuments();
     const totalPages = Math.ceil(totalUsersCount / perPage);
@@ -73,7 +76,7 @@ export const getAllUsersInfosSuperAdminAccess = async (req, res, next) => {
 
 export const getAllUsersInfos = async (req, res) => {
   try {
-    const { page = 1, perPage = 10 } = req.query;
+    const { page, perPage } = req.query;
 
     const totalUsersCount = await User.countDocuments();
     const totalPages = Math.ceil(totalUsersCount / perPage);
@@ -136,51 +139,58 @@ export const getUserInfos = async (req, res) => {
   }
 };
 
-export const editUserInfos = async (req, res) => {
-  try {
-    const selectedUserId = req.params.id;
-    const connectedUserId = req.auth.userId;
-    const connectedUser = await User.findById(connectedUserId);
+export const getUserById = async (req, res) => {
+  const { id } = req.params;
 
-    if (!connectedUser) {
+  try {
+    // Find the user by ID
+    const user = await User.findById(id);
+
+    if (!user) {
       return responseErrors.responseUsersErrors(404, res);
     }
 
-    const connectedRoleObject = await Role.findOne({
-      _id: connectedUser.roles,
+    // Return the user data
+    return res.status(200).json({
+      data: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        roles: user.roles,
+      },
     });
-
-    if (!connectedRoleObject) {
-      return responseErrors.responseRoleErrors(404, res);
-    }
-    let connectedRole = connectedRoleObject.name.toUpperCase();
-    let data = connectedUser;
-
-    if (connectedRole === "SUPER-ADMIN") {
-      data.roles.push(connectedRole);
-    } else if (connectedRole === "ADMIN") {
-      data.roles.push(connectedRole);
-    } else if (
-      connectedRole === "PROVIDER" &&
-      selectedUserId === connectedUserId
-    ) {
-      data.roles.push(connectedRole);
-    } else if (
-      connectedRole === "CLIENT" &&
-      selectedUserId === connectedUserId
-    ) {
-      data.roles.push(connectedRole);
-    } else if (connectedRole === "NEW_USER") {
-      return responseErrors.responseUsersErrors(401, res);
-    }
-    User.updateOne({ _id: selectedUserId }, { $set: data });
-    return res
-      .status(200)
-      .send({ message: "Utilisateur modifié avec succès !" });
   } catch (err) {
+    console.error(err);
     return responseErrors.responseUsersErrors(500, res);
   }
 };
+
+export const editUserInfos = async (req, res) => {
+  try{
+    const { username, email, roles } = req.body;
+
+  // Find roles in the database
+  const foundRoles = await Role.find({ name: { $in: roles } });
+
+  // Update the user
+ const user = await User.findOneAndUpdate(
+    { username, email },
+    { $addToSet: { roles: foundRoles.map(role => role._id) } },
+    { new: true, useFindAndModify: false  }
+  );
+
+  if (!user) {
+    return responseErrors.responseUsersErrors(404, res);
+  }
+
+  res.status(200).send({ message: 'User updated successfully', user });
+  }catch(err){
+    return responseErrors.responseUsersErrors(500, res);
+  }
+  
+};
+
+
 
 export const deleteUser = async (req, res) => {
   try {
@@ -222,41 +232,36 @@ export const deleteUser = async (req, res) => {
 
 export const editRole = async (req, res) => {
   try {
-    const selectedUserId = req.params.id;
-    const connectedUserId = req.auth.userId;
-    const connectedUser = await User.findById(connectedUserId);
+    const selectedUserId = req.params.userId;
+    const connectedUser = await User.findById(selectedUserId);
+    console.log(req.body);
+    const roleName = req.body.role.toUpperCase();
 
     if (!connectedUser) {
       return responseErrors.responseUsersErrors(404, res);
     }
 
-    const connectedRoleObject = await Role.findOne({
-      _id: connectedUser.roles,
-    });
+    const roleToAssign = await Role.findOne({ name: roleName });
 
-    if (!connectedRoleObject) {
+    if (!roleToAssign) {
       return responseErrors.responseRoleErrors(404, res);
     }
 
-    let data = connectedUser;
-    let connectedRole = connectedRoleObject.name.toUpperCase();
-    if (connectedRole === "SUPER-ADMIN" && !data.includes(connectedRole)) {
-      data.roles.push(connectedRole);
-    } else if (connectedRole === "ADMIN" && !data.includes(connectedRole)) {
-      data.roles.push(connectedRole);
-    } else if (connectedRole === "PROVIDER" && !data.includes(connectedRole)) {
-      data.roles.push(connectedRole);
-    } else if (connectedRole === "CLIENT" && !data.includes(connectedRole)) {
-      data.roles.push(connectedRole);
-    } else if (connectedRole === "NEW_USER") {
+    if (["SUPER-ADMIN", "ADMIN", "PROVIDER", "CLIENT"].includes(roleName)) {
+      if (!connectedUser.roles.includes(roleToAssign._id)) {
+        connectedUser.roles.push(roleToAssign._id);
+        await connectedUser.save(); // Use Mongoose save() to update the user document
+      }
+    } else if (roleName === "NEW_USER") {
       return responseErrors.responseUsersErrors(401, res);
     }
-    User.updateOne({ _id: selectedUserId }, { $set: data });
+
     return res
       .status(200)
-      .send({ message: "Utilisateur modifié avec succès !" });
+      .json({ message: "Utilisateur modifié avec succès !" });
   } catch (err) {
-    responseErrors.responseUsersErrors(500, res);
+    console.error(err); // Log the error for debugging purposes
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

@@ -72,9 +72,8 @@ const isAdmin = async (req, res, next) => {
   try {
     const user = await User.findById(userId);
     const role = await Role.findOne({ _id: user.roles[0] });
-    if (
-      role.name.toUpperCase() === definedRole.toUpperCase() ||
-      role.name.toUpperCase() === parentRole
+    if (      
+      role.name.toUpperCase() === parentRole.toUpperCase() ||role.name.toUpperCase() ===definedRole.toUpperCase()
     ) {
       return next();
     }
