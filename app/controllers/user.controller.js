@@ -15,9 +15,9 @@ async function getUser(req, res, userId) {
   });
 }
 
-async function getRole(userId) {
-  const user = await User.findById(userId);
-  return await Role.findOne({ _id: user.roles });
+async function getRoles(userId) {
+  const user = await User.findById(userId).populate('roles');
+  return user.roles;
 }
 
 async function addRoleToUser(userId, role) {
@@ -34,43 +34,33 @@ async function addRoleToUser(userId, role) {
  */
 export const getAllUsersInfosSuperAdminAccess = async (req, res, next) => {
   try {
-    const {
-      page = req.page ? req.page : 1,
-      perPage = req.perPage ? req.perPage : 10,
-    } = req.query;
+    const { page, perPage } = req.query;
 
     const totalUsersCount = await User.countDocuments();
     const totalPages = Math.ceil(totalUsersCount / perPage);
 
     const users = await User.find()
       .skip((page - 1) * perPage)
-      .limit(perPage);
+      .limit(perPage)
+      .populate('roles'); // Populate roles
 
     if (users.length !== 0) {
       const usersWithRoles = [];
-      for (const user of users) {
-        const roles = await getRole(user._id);
+      for (const element of users) {
+        const user = element;
         usersWithRoles.push({
           id: user._id,
           username: user.username,
           email: user.email,
-          roles: roles.name,
+          roles: user.roles.map(role => role.name), // Now you can access role.name
         });
       }
-
-      const response = {
-        totalUsers: totalUsersCount,
-        totalPages,
-        currentPage: page,
-        users: usersWithRoles,
-      };
-
-      res.status(200).json(response);
+      return res.status(200).send(usersWithRoles);
     } else {
       responseErrors.responseUsersErrors(404, res);
     }
   } catch (err) {
-    responseErrors.responseUsersErrors(500, res);
+    return responseErrors.responseUsersErrors(500, res);
   }
 };
 
@@ -83,18 +73,18 @@ export const getAllUsersInfos = async (req, res) => {
 
     const users = await User.find()
       .skip((page - 1) * perPage)
-      .limit(perPage);
+      .limit(perPage)
+      .populate('roles'); // Populate roles
 
     if (users.length !== 0) {
       const usersWithRoles = [];
       for (const element of users) {
         const user = element;
-        const roles = await getRole(user._id);
         usersWithRoles.push({
           id: user._id,
           username: user.username,
           email: user.email,
-          roles: roles.name,
+          roles: user.roles.map(role => role.name), // Now you can access role.name
         });
       }
       return res.status(200).send(usersWithRoles);
@@ -115,23 +105,26 @@ export const getUserInfos = async (req, res) => {
       return responseErrors.responseUsersErrors(404, res);
     }
 
-    const connectedRoleObject = await Role.findOne({
-      _id: connectedUser.roles,
+    const connectedRolesObjects = await Role.find({
+      _id: { $in: connectedUser.roles },
     });
 
-    if (!connectedRoleObject) {
+    if (!connectedRolesObjects) {
       return responseErrors.responseRoleErrors(404, res);
     }
 
-    let connectedRole = connectedRoleObject.name.toUpperCase();
+    const connectedRoles = connectedRolesObjects.map((role) =>
+      role.name.toUpperCase()
+    );
+
     if (
-      connectedRole === "SUPER-ADMIN" ||
-      connectedRole === "ADMIN" ||
-      connectedRole === "PROVIDER" ||
-      (connectedRole === "CLIENT" && selectedUserId === connectedUserId)
+      connectedRoles.includes("SUPER-ADMIN") ||
+      connectedRoles.includes("ADMIN") ||
+      connectedRoles.includes("PROVIDER") ||
+      (connectedRoles.includes("CLIENT") && selectedUserId === connectedUserId)
     ) {
       await getUser(req, res, selectedUserId);
-    } else if (connectedRole === "NEW_USER") {
+    } else if (connectedRoles.includes("NEW_USER")) {
       return responseErrors.responseUsersErrors(401, res);
     }
   } catch (err) {
@@ -166,31 +159,28 @@ export const getUserById = async (req, res) => {
 };
 
 export const editUserInfos = async (req, res) => {
-  try{
+  try {
     const { username, email, roles } = req.body;
 
-  // Find roles in the database
-  const foundRoles = await Role.find({ name: { $in: roles } });
+    // Find roles in the database
+    const foundRoles = await Role.find({ name: { $in: roles } });
 
-  // Update the user
- const user = await User.findOneAndUpdate(
-    { username, email },
-    { $addToSet: { roles: foundRoles.map(role => role._id) } },
-    { new: true, useFindAndModify: false  }
-  );
+    // Update the user
+    const user = await User.findOneAndUpdate(
+      { username, email },
+      { $addToSet: { roles: foundRoles.map((role) => role._id) } },
+      { new: true, useFindAndModify: false }
+    );
 
-  if (!user) {
-    return responseErrors.responseUsersErrors(404, res);
-  }
+    if (!user) {
+      return responseErrors.responseUsersErrors(404, res);
+    }
 
-  res.status(200).send({ message: 'User updated successfully', user });
-  }catch(err){
+    res.status(200).send({ message: "User updated successfully", user });
+  } catch (err) {
     return responseErrors.responseUsersErrors(500, res);
   }
-  
 };
-
-
 
 export const deleteUser = async (req, res) => {
   try {
@@ -235,7 +225,7 @@ export const editRole = async (req, res) => {
     const selectedUserId = req.params.userId;
     const connectedUser = await User.findById(selectedUserId);
     console.log(req.body);
-    const roleName = req.body.role.toUpperCase();
+    const roleName = req.body.role;
 
     if (!connectedUser) {
       return responseErrors.responseUsersErrors(404, res);
