@@ -23,7 +23,6 @@ export async function responseUsersErrors(req, res) {
         message: "Aucun utilisateur trouvé !",
       });
     case 500:
-    
       return res.status(500).send({
         message: "Erreur server",
       });
@@ -31,7 +30,6 @@ export async function responseUsersErrors(req, res) {
 }
 
 export async function responseRoleErrors(req, res) {
-  console.log(res);
   switch (req.status) {
     case 400:
       return res.status(400).send({
