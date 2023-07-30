@@ -211,35 +211,6 @@ userRouter.put(
 
 /**
  * @swagger
- * /api/user/{id}:
- *   delete:
- *     summary: Delete user by ID.
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: User ID to delete.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Success, user deleted.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: User deleted successfully!
- */
-userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
-
-/**
- * @swagger
  * /api/user/{userId}/add/role:
  *   post:
  *     summary: Add user role
@@ -253,17 +224,17 @@ userRouter.delete("/user/:id", [authJwt.verifyToken], deleteUser);
  *         description: User ID for adding the role.
  *         schema:
  *           type: string
- *       - name: role
- *         in: body
- *         required: true
- *         description: Role object to be added to the user.
- *         schema:
- *           type: object
- *           properties:
- *             role:
- *               type: string
- *               example: "admin"
- *               description: The role to be added to the user.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 example: "admin"
+ *                 description: The role to be added to the user.
  *     responses:
  *       200:
  *         description: Success, user updated.
@@ -284,22 +255,33 @@ userRouter.post(
 
 /**
  * @swagger
- * /api/user/remove/role/{:id}:
+ * /api/user/{userId}/remove/role:
  *   delete:
- *     summary: Remove user role
+ *     summary: Remove a role from a user
  *     tags: [Users-Roles]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
+ *       - name: userId
  *         in: path
  *         required: true
- *         description: add User role.
+ *         description: User ID from which the role will be removed.
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 example: "client"
+ *                 description: The role to be removed from the user.
  *     responses:
  *       200:
- *         description: Success, user deleted.
+ *         description: Success, role removed from user.
  *         content:
  *           application/json:
  *             schema:
@@ -307,10 +289,14 @@ userRouter.post(
  *               properties:
  *                 message:
  *                   type: string
- *                   example: User updated successfully!
+ *                   example: Utilisateur modifié avec succès !
+ *       404:
+ *         description: Role not found in the user's roles.
+ *       500:
+ *         description: Internal server error.
  */
 userRouter.delete(
-  "user/remove/role/:id",
+  "/user/:userId/remove/role",
   [authJwt.verifyToken, authJwt.isSuperAdmin, authJwt.isAdmin],
   removeRole
 );

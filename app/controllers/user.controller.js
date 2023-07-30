@@ -16,7 +16,7 @@ async function getUser(req, res, userId) {
 }
 
 async function getRoles(userId) {
-  const user = await User.findById(userId).populate('roles');
+  const user = await User.findById(userId).populate("roles");
   return user.roles;
 }
 
@@ -42,7 +42,7 @@ export const getAllUsersInfosSuperAdminAccess = async (req, res, next) => {
     const users = await User.find()
       .skip((page - 1) * perPage)
       .limit(perPage)
-      .populate('roles'); // Populate roles
+      .populate("roles"); // Populate roles
 
     if (users.length !== 0) {
       const usersWithRoles = [];
@@ -52,7 +52,7 @@ export const getAllUsersInfosSuperAdminAccess = async (req, res, next) => {
           id: user._id,
           username: user.username,
           email: user.email,
-          roles: user.roles.map(role => role.name), // Now you can access role.name
+          roles: user.roles.map((role) => role.name), // Now you can access role.name
         });
       }
       return res.status(200).send(usersWithRoles);
@@ -74,7 +74,7 @@ export const getAllUsersInfos = async (req, res) => {
     const users = await User.find()
       .skip((page - 1) * perPage)
       .limit(perPage)
-      .populate('roles'); // Populate roles
+      .populate("roles"); // Populate roles
 
     if (users.length !== 0) {
       const usersWithRoles = [];
@@ -84,7 +84,7 @@ export const getAllUsersInfos = async (req, res) => {
           id: user._id,
           username: user.username,
           email: user.email,
-          roles: user.roles.map(role => role.name), // Now you can access role.name
+          roles: user.roles.map((role) => role.name), // Now you can access role.name
         });
       }
       return res.status(200).send(usersWithRoles);
@@ -224,7 +224,6 @@ export const editRole = async (req, res) => {
   try {
     const selectedUserId = req.params.userId;
     const connectedUser = await User.findById(selectedUserId);
-    console.log(req.body);
     const roleName = req.body.role;
 
     if (!connectedUser) {
@@ -237,7 +236,11 @@ export const editRole = async (req, res) => {
       return responseErrors.responseRoleErrors(404, res);
     }
 
-    if (["SUPER-ADMIN", "ADMIN", "PROVIDER", "CLIENT"].includes(roleName)) {
+    if (
+      ["SUPER-ADMIN", "ADMIN", "PROVIDER", "CLIENT"].includes(
+        roleName.toUpperCase()
+      )
+    ) {
       if (!connectedUser.roles.includes(roleToAssign._id)) {
         connectedUser.roles.push(roleToAssign._id);
         await connectedUser.save(); // Use Mongoose save() to update the user document
@@ -257,26 +260,28 @@ export const editRole = async (req, res) => {
 
 export const removeRole = async (req, res) => {
   try {
-    const selectedUserId = req.params.id;
-    const connectedUserId = req.auth.userId;
-    const connectedUser = await User.findById(connectedUserId);
-    const connectedRoleObject = await Role.findOne({
-      _id: connectedUser.roles,
-    });
-    let connectedRole = connectedRoleObject.name.toUpperCase();
-    let data = connectedUser;
-    if (connectedRole === "SUPER-ADMIN" && data.includes(connectedRole)) {
-      data.roles = data.roles.filter((role) => role != "SUPER-ADMIN");
-    } else if (connectedRole === "ADMIN" && data.includes(connectedRole)) {
-      data.roles = data.roles.filter((role) => role != "ADMIN");
-    } else if (connectedRole === "PROVIDER" && data.includes(connectedRole)) {
-      data.roles = data.roles.filter((role) => role != "PROVIDER");
-    } else if (connectedRole === "CLIENT" && data.includes(connectedRole)) {
-      data.roles = data.roles.filter((role) => role != "CLIENT");
-    } else if (connectedRole === "NEW_USER") {
-      return responseErrors.responseUsersErrors(401, res);
+    const selectedUserId = req.params.userId;
+    const roleToDelete = req.body.role;
+    const user = await User.findById(selectedUserId).populate("roles");
+
+    // Find the role to delete in the user's roles
+    const roleObject = user.roles.find(
+      (role) => role.name.toUpperCase() === roleToDelete.toUpperCase()
+    );
+
+    if (!roleObject) {
+      return res
+        .status(404)
+        .send({ message: "Role not found in the user's roles" });
     }
-    User.updateOne({ _id: selectedUserId }, { $set: data });
+
+    // Remove the role from the user's roles
+    user.roles = user.roles.filter(
+      (role) => role._id.toString() !== roleObject._id.toString()
+    );
+
+    // Save the user document
+    await user.save();
     return res
       .status(200)
       .send({ message: "Utilisateur modifié avec succès !" });
